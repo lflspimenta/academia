@@ -63,3 +63,24 @@ export async function sendUserRecovery(formData:FormData){
   await supabase.auth.resetPasswordForEmail(email,{redirectTo:`${site}/auth/callback?next=/reset-password`})
   redirect('/admin/utilizadores?recovery=1')
 }
+
+export async function setCourseAccess(formData:FormData){
+  const {user:adminUser}=await requireAdmin()
+  const userId=String(formData.get('user_id')||'')
+  const courseId=Number(formData.get('course_id'))
+  const enabled=String(formData.get('enabled'))==='true'
+  if(!userId||!courseId)return
+  const admin=createAdminClient()
+  if(enabled){
+    await admin.from('course_access').upsert({
+      user_id:userId,course_id:courseId,access_type:'purchase',
+      granted_by:adminUser.id,notes:'Acesso atribuído no backoffice'
+    },{onConflict:'user_id,course_id'})
+  }else{
+    const {data:initial}=await admin.rpc('initial_course_id')
+    if(Number(initial)===courseId)return
+    await admin.from('course_access').delete().eq('user_id',userId).eq('course_id',courseId)
+  }
+  revalidatePath('/admin/utilizadores')
+  revalidatePath('/academia')
+}

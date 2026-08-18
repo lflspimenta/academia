@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { createAppUser,changeUserRole,toggleUserBlocked,sendUserRecovery } from '../actions'
+import { createAppUser,changeUserRole,toggleUserBlocked,sendUserRecovery,setCourseAccess } from '../actions'
 
 export default async function UsersAdmin({searchParams}:{searchParams:Promise<Record<string,string|undefined>>}){
   const params=await searchParams
@@ -13,6 +13,11 @@ export default async function UsersAdmin({searchParams}:{searchParams:Promise<Re
   const admin=createAdminClient()
   const {data:{users}}=await admin.auth.admin.listUsers({page:1,perPage:200})
   const {data:profiles}=await admin.from('profiles').select('id,full_name,role,created_at')
+  const {data:courses}=await admin.from('courses').select('id,title,slug,position').eq('status','published').order('position')
+  const {data:accessRows}=await admin.from('course_access').select('user_id,course_id')
+  const {data:initialCourse}=await admin.rpc('initial_course_id')
+  const accessKey=new Set((accessRows||[]).map((a:any)=>`${a.user_id}:${a.course_id}`))
+
   const profileMap=new Map((profiles||[]).map((x:any)=>[x.id,x]))
   const rows=(users||[]).map(u=>({
     id:u.id,email:u.email||'—',created_at:u.created_at,
@@ -46,6 +51,28 @@ export default async function UsersAdmin({searchParams}:{searchParams:Promise<Re
           {r.id!==user.id&&<form action={toggleUserBlocked}><input type="hidden" name="id" value={r.id}/><input type="hidden" name="blocked" value={String(r.banned)}/><button className="text-button" type="submit">{r.banned?'Reativar':'Bloquear'}</button></form>}
         </div></td></tr>)}
       </tbody></table></div>
+    </section>
+
+    <section className="section card">
+      <div className="topbar"><div><h2>Acessos às formações</h2><p className="muted small">O curso de iniciação está incluído para todos. Ative aqui as formações adquiridas posteriormente.</p></div></div>
+      <div className="access-admin-list">
+        {rows.map((r:any)=><div className="access-user-card" key={`access-${r.id}`}>
+          <div className="access-user-head"><div><strong>{r.full_name||r.email}</strong><div className="small muted">{r.email}</div></div><span className="badge">{r.role==='admin'?'Administrador':'Aluno'}</span></div>
+          <div className="access-course-grid">
+            {(courses||[]).map((c:any)=>{
+              const isInitial=Number(c.id)===Number(initialCourse)
+              const active=r.role==='admin'||isInitial||accessKey.has(`${r.id}:${c.id}`)
+              return <form action={setCourseAccess} className={`access-course-item ${active?'active':''}`} key={`${r.id}-${c.id}`}>
+                <input type="hidden" name="user_id" value={r.id}/>
+                <input type="hidden" name="course_id" value={c.id}/>
+                <input type="hidden" name="enabled" value={String(!active)}/>
+                <div><strong>{c.title}</strong><span>{r.role==='admin'?'Acesso total':isInitial?'Incluído':active?'Acesso ativo':'Bloqueado'}</span></div>
+                {r.role!=='admin'&&!isInitial&&<button type="submit" className="text-button">{active?'Retirar':'Dar acesso'}</button>}
+              </form>
+            })}
+          </div>
+        </div>)}
+      </div>
     </section>
   </AppShell>
 }

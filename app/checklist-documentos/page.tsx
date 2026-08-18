@@ -1,3 +1,4 @@
+import { redirect } from 'next/navigation'
 import AppShell from '@/components/AppShell'
 import {createClient} from '@/lib/supabase/server'
 import DocumentChecklist from '@/components/DocumentChecklist'

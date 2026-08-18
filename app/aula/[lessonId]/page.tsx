@@ -3,13 +3,16 @@ import { createClient } from '@/lib/supabase/server'
 import { lessonText } from '@/lib/content'
 import MarkCompleteButton from '@/components/MarkCompleteButton'
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 
 export default async function LessonPage({params}:{params:Promise<{lessonId:string}>}){
  const {lessonId}=await params;const id=Number(lessonId);if(!Number.isFinite(id))notFound();const supabase=await createClient()
  const {data:lesson}=await supabase.from('lessons').select('id,title,content,duration_minutes,legal_sensitive,verified_at,source_url,module_id,position,modules(id,title,position,course_id,courses(id,title,slug))').eq('id',id).eq('status','published').single()
  if(!lesson)notFound();const content=lessonText(lesson.content);const {data:{user}}=await supabase.auth.getUser();let done=false;if(user){const {data:p}=await supabase.from('user_lesson_progress').select('completed').eq('user_id',user.id).eq('lesson_id',id).maybeSingle();done=!!p?.completed}
- const {data:quiz}=await supabase.from('quizzes').select('id,title').eq('lesson_id',id).maybeSingle();const mod:any=lesson.modules;const course:any=mod?.courses
+ const mod:any=lesson.modules;const course:any=mod?.courses
+ const {data:allowed}=await supabase.rpc('has_course_access',{target_course_id:course?.id})
+ if(!allowed)redirect(`/academia/${course?.slug}`)
+ const {data:quiz}=await supabase.from('quizzes').select('id,title').eq('lesson_id',id).maybeSingle()
  const {data:siblings}=await supabase.from('lessons').select('id,title,position,module_id,modules(position,course_id)').eq('status','published')
  const sameCourse=(siblings||[]).filter((l:any)=>l.modules?.course_id===course?.id).sort((a:any,b:any)=>(a.modules?.position-b.modules?.position)||(a.position-b.position))
  const idx=sameCourse.findIndex((l:any)=>l.id===id);const prev=idx>0?sameCourse[idx-1]:null;const next=idx>=0&&idx<sameCourse.length-1?sameCourse[idx+1]:null

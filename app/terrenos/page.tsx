@@ -1,3 +1,4 @@
+import { redirect } from 'next/navigation'
 import AppShell from '@/components/AppShell'
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
@@ -5,6 +6,10 @@ import LandAnalyzer from '@/components/LandAnalyzer'
 
 export default async function TerrenosPage(){
   const supabase=await createClient()
+  const {data:course}=await supabase.from('courses').select('id').eq('slug','terrenos').eq('status','published').maybeSingle()
+  if(!course) redirect('/academia')
+  const {data:allowed}=await supabase.rpc('has_course_access',{target_course_id:course.id})
+  if(!allowed) redirect('/academia/terrenos')
   const {data:rules}=await supabase
     .from('land_analysis_rules')
     .select('id,rule_type,category,severity,title,message,next_step,conditions,position')

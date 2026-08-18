@@ -1,58 +1,35 @@
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
+import { accessContext } from '@/lib/access'
 import { signOutAction } from '@/app/auth/signout/actions'
 
-const baseNav = [
-  ['/dashboard', 'Início'],
-  ['/academia', 'Academia'],
-  ['/documentos', 'Documentos'],
-  ['/radar', 'Radar legislativo'],
-  ['/terrenos', 'Analisar Terreno'],
-  ['/alteracao-uso', 'Alterar Uso do Imóvel'],
-  ['/checklist-documentos', 'Que documentos preciso?'],
-]
-
 export default async function AppShell({ children }: { children: React.ReactNode }) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const {isAdmin,accessIds,supabase}=await accessContext()
+  const {data:courses}=await supabase.from('courses').select('id,slug').eq('status','published')
+  const idBySlug=new Map((courses||[]).map((c:any)=>[c.slug,Number(c.id)]))
+  const can=(slug:string)=>isAdmin||accessIds.has(idBySlug.get(slug)||-1)
 
-  let isAdmin = false
-  if (user) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .maybeSingle()
+  const nav:any[]=[
+    ['/dashboard','Início'],
+    ['/academia','Academia'],
+    ['/documentos','Documentos'],
+    ['/radar','Radar legislativo'],
+  ]
+  if(can('terrenos')) nav.push(['/terrenos','Analisar Terreno'])
+  if(can('urbanismo-pratico')) nav.push(['/alteracao-uso','Alterar Uso do Imóvel'])
+  if(can('documentacao-imobiliaria')) nav.push(['/checklist-documentos','Que documentos preciso?'])
+  if(isAdmin) nav.push(['/admin','Administração'])
 
-    isAdmin = profile?.role === 'admin'
-  }
-
-  const nav = isAdmin ? [...baseNav, ['/admin', 'Administração']] : baseNav
-
-  return (
-    <div className="app-shell">
-      <aside className="sidebar">
-        <div className="brand-kicker">Academia</div>
-        <div className="brand-title">Imobiliária</div>
-        <div className="brand-sub">Formação profissional · Portugal</div>
-
-        <nav className="nav">
-          {nav.map(([href, label]) => (
-            <Link key={href} href={href}>{label}</Link>
-          ))}
-        </nav>
-
-        <div className="sidebar-bottom">
-          <div className="sidebar-legal-note">
-            Conteúdo legal com data de verificação e fonte oficial.
-          </div>
-          <form action={signOutAction}>
-            <button className="logout-button" type="submit">Terminar sessão</button>
-          </form>
-        </div>
-      </aside>
-
-      <main className="content">{children}</main>
-    </div>
-  )
+  return <div className="app-shell">
+    <aside className="sidebar">
+      <div className="brand-kicker">Academia</div>
+      <div className="brand-title">Imobiliária</div>
+      <div className="brand-sub">Formação profissional · Portugal</div>
+      <nav className="nav">{nav.map(([href,label])=><Link key={href} href={href}>{label}</Link>)}</nav>
+      <div className="sidebar-bottom">
+        <div className="sidebar-legal-note">Conteúdo legal com data de verificação e fonte oficial.</div>
+        <form action={signOutAction}><button className="logout-button" type="submit">Terminar sessão</button></form>
+      </div>
+    </aside>
+    <main className="content">{children}</main>
+  </div>
 }
