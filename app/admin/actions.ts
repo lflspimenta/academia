@@ -84,3 +84,165 @@ export async function setCourseAccess(formData:FormData){
   revalidatePath('/admin/utilizadores')
   revalidatePath('/academia')
 }
+
+
+export async function revokeCertificate(formData:FormData){
+  await requireAdmin()
+  const id=Number(formData.get('id'))
+  const reason=String(formData.get('reason')||'').trim()||'Invalidado pelo administrador'
+  if(!id)return
+  const admin=createAdminClient()
+  await admin.from('certificates').update({
+    status:'revoked',
+    revoked_at:new Date().toISOString(),
+    revoked_reason:reason
+  }).eq('id',id)
+  revalidatePath('/admin/certificados')
+}
+
+export async function restoreCertificate(formData:FormData){
+  await requireAdmin()
+  const id=Number(formData.get('id'))
+  if(!id)return
+  const admin=createAdminClient()
+  await admin.from('certificates').update({
+    status:'valid',
+    revoked_at:null,
+    revoked_reason:null
+  }).eq('id',id)
+  revalidatePath('/admin/certificados')
+}
+
+export async function updateCourseMeta(formData:FormData){
+  await requireAdmin()
+  const id=Number(formData.get('id'))
+  const title=String(formData.get('title')||'').trim()
+  const description=String(formData.get('description')||'').trim()
+  const level=String(formData.get('level')||'').trim()
+  if(!id||!title)return
+  const admin=createAdminClient()
+  await admin.from('courses').update({title,description,level}).eq('id',id)
+  revalidatePath('/admin/conteudos');revalidatePath('/academia')
+}
+
+export async function updateModuleMeta(formData:FormData){
+  await requireAdmin()
+  const id=Number(formData.get('id'))
+  const title=String(formData.get('title')||'').trim()
+  const description=String(formData.get('description')||'').trim()
+  const position=Number(formData.get('position')||1)
+  if(!id||!title)return
+  const admin=createAdminClient()
+  await admin.from('modules').update({title,description,position}).eq('id',id)
+  revalidatePath('/admin/conteudos');revalidatePath('/academia')
+}
+
+export async function updateLessonMeta(formData:FormData){
+  await requireAdmin()
+  const id=Number(formData.get('id'))
+  const title=String(formData.get('title')||'').trim()
+  const duration_minutes=Number(formData.get('duration_minutes')||8)
+  const source_url=String(formData.get('source_url')||'').trim()||null
+  const verified_at=String(formData.get('verified_at')||'').trim()||null
+  if(!id||!title)return
+  const admin=createAdminClient()
+  await admin.from('lessons').update({title,duration_minutes,source_url,verified_at}).eq('id',id)
+  revalidatePath('/admin/conteudos');revalidatePath('/academia')
+}
+
+export async function updateLessonBody(formData:FormData){
+  await requireAdmin()
+  const id=Number(formData.get('id'))
+  const intro=String(formData.get('intro')||'').trim()
+  const takeaway=String(formData.get('takeaway')||'').trim()
+  const section1Title=String(formData.get('section1_title')||'').trim()
+  const section1Body=String(formData.get('section1_body')||'').trim()
+  const section2Title=String(formData.get('section2_title')||'').trim()
+  const section2Body=String(formData.get('section2_body')||'').trim()
+  if(!id)return
+  const sections=[
+    ...(section1Title||section1Body?[{title:section1Title||'Conteúdo',body:section1Body}]:[]),
+    ...(section2Title||section2Body?[{title:section2Title||'Conteúdo',body:section2Body}]:[])
+  ]
+  const admin=createAdminClient()
+  await admin.from('lessons').update({content:{intro,sections,takeaway}}).eq('id',id)
+  revalidatePath('/admin/conteudos');revalidatePath(`/aula/${id}`)
+}
+
+export async function markLessonForReview(formData:FormData){
+  await requireAdmin()
+  const id=Number(formData.get('id'))
+  if(!id)return
+  const admin=createAdminClient()
+  await admin.from('lessons').update({verified_at:null}).eq('id',id)
+  revalidatePath('/admin/conteudos')
+}
+
+export async function verifyLessonToday(formData:FormData){
+  await requireAdmin()
+  const id=Number(formData.get('id'))
+  if(!id)return
+  const admin=createAdminClient()
+  await admin.from('lessons').update({verified_at:new Date().toISOString().slice(0,10)}).eq('id',id)
+  revalidatePath('/admin/conteudos')
+}
+
+export async function createQuiz(formData:FormData){
+  await requireAdmin()
+  const module_id=Number(formData.get('module_id'))
+  const title=String(formData.get('title')||'').trim()
+  const pass_percentage=Number(formData.get('pass_percentage')||80)
+  if(!module_id||!title)return
+  const admin=createAdminClient()
+  await admin.from('quizzes').insert({module_id,title,pass_percentage})
+  revalidatePath('/admin/avaliacoes')
+}
+
+export async function updateQuiz(formData:FormData){
+  await requireAdmin()
+  const id=Number(formData.get('id'))
+  const title=String(formData.get('title')||'').trim()
+  const pass_percentage=Number(formData.get('pass_percentage')||80)
+  if(!id||!title)return
+  const admin=createAdminClient()
+  await admin.from('quizzes').update({title,pass_percentage}).eq('id',id)
+  revalidatePath('/admin/avaliacoes')
+}
+
+export async function addQuestion(formData:FormData){
+  await requireAdmin()
+  const quiz_id=Number(formData.get('quiz_id'))
+  const question=String(formData.get('question')||'').trim()
+  const explanation=String(formData.get('explanation')||'').trim()
+  const correct=String(formData.get('correct')||'a')
+  const a=String(formData.get('a')||'').trim()
+  const b=String(formData.get('b')||'').trim()
+  const c=String(formData.get('c')||'').trim()
+  if(!quiz_id||!question||!a||!b)return
+  const admin=createAdminClient()
+  const {count}=await admin.from('questions').select('*',{count:'exact',head:true}).eq('quiz_id',quiz_id)
+  const {data:q}=await admin.from('questions').insert({
+    quiz_id,question,explanation,position:(count||0)+1
+  }).select('id').single()
+  if(!q)return
+  const answers=[a,b,c].filter(Boolean)
+  await admin.from('answers').insert(answers.map((answer,index)=>({
+    question_id:q.id,answer,is_correct:['a','b','c'][index]===correct,position:index+1
+  })))
+  revalidatePath('/admin/avaliacoes')
+}
+
+export async function updateRadarItem(formData:FormData){
+  await requireAdmin()
+  const id=Number(formData.get('id'))
+  const title=String(formData.get('title')||'').trim()
+  const topic=String(formData.get('topic')||'').trim()
+  const summary=String(formData.get('summary')||'').trim()
+  const impact=String(formData.get('impact')||'').trim()
+  const source_url=String(formData.get('source_url')||'').trim()
+  const verified_at=String(formData.get('verified_at')||'').trim()||new Date().toISOString().slice(0,10)
+  if(!id||!title||!topic||!summary||!source_url)return
+  const admin=createAdminClient()
+  await admin.from('legislative_updates').update({title,topic,summary,impact,source_url,verified_at}).eq('id',id)
+  revalidatePath('/admin/radar');revalidatePath('/radar')
+}
