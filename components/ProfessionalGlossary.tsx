@@ -1,7 +1,7 @@
 'use client'
 import {useMemo,useState} from 'react'
 import {Search,ChevronDown,ChevronUp,BookOpen} from 'lucide-react'
-type I={id:number,term:string,full_name:string,category:string,language:string,definition:string,portugal_usage:string|null,caution:string|null,related_terms:string|null,source_url?:string|null,verified_at?:string|null}
+type I={id:number,term:string,full_name:string,category:string,language:string,definition:string,portugal_usage:string|null,caution:string|null,related_terms:string|null}
 export default function ProfessionalGlossary({items}:{items:I[]}){
  const[q,setQ]=useState('');const[cat,setCat]=useState('Todos');const[open,setOpen]=useState<number|null>(null)
  const cats=['Todos',...Array.from(new Set(items.map(x=>x.category))).sort()]
@@ -10,6 +10,6 @@ export default function ProfessionalGlossary({items}:{items:I[]}){
  <div className="glossary-cats">{cats.map(c=><button type="button" key={c} className={cat===c?'active':''} onClick={()=>setCat(c)}>{c}</button>)}</div>
  <div className="glossary-count">{list.length} {list.length===1?'termo':'termos'}</div>
  <div className="glossary-list">{list.map(x=><article className="glossary-item" key={x.id}><button type="button" className="glossary-title" onClick={()=>setOpen(open===x.id?null:x.id)}><div><div><strong>{x.term}</strong><span className={'lang '+(x.language==='EN'?'en':'')}>{x.language}</span></div><small>{x.full_name}</small></div>{open===x.id?<ChevronUp/>:<ChevronDown/>}</button>
- {open===x.id&&<div className="glossary-body"><div><label>O que é</label><p>{x.definition}</p></div>{x.portugal_usage&&<div><label>Como é usado em Portugal</label><p>{x.portugal_usage}</p></div>}{x.caution&&<div className="glossary-caution"><label>Atenção</label><p>{x.caution}</p></div>}{x.related_terms&&<div><label>Termos relacionados</label><p>{x.related_terms}</p></div>}{(x.source_url||x.verified_at)&&<div className="glossary-source"><label>Verificação</label><p>{x.verified_at?`Verificado em ${new Date(x.verified_at+'T00:00:00').toLocaleDateString('pt-PT')}`:'Fonte oficial disponível.'}</p>{x.source_url&&<a href={x.source_url} target="_blank" rel="noreferrer">Consultar fonte oficial →</a>}</div>}</div>}</article>)}</div>
+ {open===x.id&&<div className="glossary-body"><div><label>O que é</label><p>{x.definition}</p></div>{x.portugal_usage&&<div><label>Como é usado em Portugal</label><p>{x.portugal_usage}</p></div>}{x.caution&&<div className="glossary-caution"><label>Atenção</label><p>{x.caution}</p></div>}{x.related_terms&&<div><label>Termos relacionados</label><p>{x.related_terms}</p></div>}</div>}</article>)}</div>
  {!list.length&&<div className="empty-state"><BookOpen/><strong>Nenhum termo encontrado</strong><p>Tente outra palavra ou categoria.</p></div>}</>
 }
