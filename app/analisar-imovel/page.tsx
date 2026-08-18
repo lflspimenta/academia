@@ -6,7 +6,11 @@ import Link from 'next/link'
 import { ShieldCheck,FileSearch,Route,Clock3 } from 'lucide-react'
 
 export default async function AnalyseProperty(){
- const s=await createClient();const {data:{user}}=await s.auth.getUser();if(!user)redirect('/login')
+ const s=await createClient()
+ const {data:courseAccessTarget}=await s.from('courses').select('id').eq('slug','pratica-profissional-avancada').eq('status','published').maybeSingle()
+ if(!courseAccessTarget) redirect('/academia')
+ const {data:hasAccess}=await s.rpc('has_course_access',{target_course_id:courseAccessTarget.id})
+ if(!hasAccess) redirect('/academia/pratica-profissional-avancada');const {data:{user}}=await s.auth.getUser();if(!user)redirect('/login')
  const {data:history}=await s.from('property_analyses').select('id,title,municipality,property_type,risk_level,updated_at,status').eq('user_id',user.id).neq('status','archived').order('updated_at',{ascending:false}).limit(8)
  return <AppShell><div className="tool-hero analysis-hero"><div><div className="eyebrow">FERRAMENTA PROFISSIONAL</div><h1>Analisar Imóvel</h1><p>Due diligence guiada da angariação. Identifique riscos, documentos em falta e próximos passos antes de avançar.</p></div><ShieldCheck size={44}/></div>
  <section className="section analysis-benefits"><div><FileSearch/><strong>Documentação</strong><span>Organiza o que existe e o que falta confirmar.</span></div><div><ShieldCheck/><strong>Alertas</strong><span>Sinaliza inconsistências e pontos de risco.</span></div><div><Route/><strong>Próximos passos</strong><span>Indica o que deve verificar a seguir.</span></div></section>

@@ -7,7 +7,11 @@ import AnalysisReportActions from '@/components/AnalysisReportActions'
 import { archivePropertyAnalysis } from '../actions'
 
 export default async function AnalysisResult({params}:{params:Promise<{id:string}>}){
- const {id}=await params;const s=await createClient();const {data:{user}}=await s.auth.getUser();if(!user)redirect('/login')
+ const {id}=await params;const s=await createClient()
+ const {data:courseAccessTarget}=await s.from('courses').select('id').eq('slug','pratica-profissional-avancada').eq('status','published').maybeSingle()
+ if(!courseAccessTarget) redirect('/academia')
+ const {data:hasAccess}=await s.rpc('has_course_access',{target_course_id:courseAccessTarget.id})
+ if(!hasAccess) redirect('/academia/pratica-profissional-avancada');const {data:{user}}=await s.auth.getUser();if(!user)redirect('/login')
  const {data:a}=await s.from('property_analyses').select('*').eq('id',Number(id)).eq('user_id',user.id).maybeSingle();if(!a)notFound()
  const r:any=a.result||{};const Icon=({level}:{level:string})=>level==='critical'?<CircleX/>:level==='warning'?<TriangleAlert/>:<CircleCheck/>
  return <AppShell><div className="analysis-report-head"><div><div className="eyebrow">DUE DILIGENCE DA ANGARIAÇÃO</div><h1>{a.title}</h1><p>{a.municipality||'Município não indicado'} · análise atualizada em {new Date(a.updated_at).toLocaleDateString('pt-PT')}</p></div><div className={`analysis-score ${r.risk}`}><strong>{r.score}</strong><span>/ 100</span><small>{r.risk==='high'?'Risco elevado':r.risk==='medium'?'Requer atenção':'Risco baixo'}</small></div></div>

@@ -6,6 +6,10 @@ import { redirect } from 'next/navigation'
 function val(fd:FormData,k:string){return String(fd.get(k)||'')}
 export async function savePropertyAnalysis(fd:FormData){
  const s=await createClient();const {data:{user}}=await s.auth.getUser();if(!user)redirect('/login')
+ const {data:course}=await s.from('courses').select('id').eq('slug','pratica-profissional-avancada').eq('status','published').maybeSingle()
+ if(!course) redirect('/academia')
+ const {data:allowed}=await s.rpc('has_course_access',{target_course_id:course.id})
+ if(!allowed) redirect('/academia/pratica-profissional-avancada')
  const answers={
   is_land:val(fd,'is_land'),registry:val(fd,'registry'),tax_record:val(fd,'tax_record'),
   area_mismatch:val(fd,'area_mismatch'),ownership_confirmed:val(fd,'ownership_confirmed'),
@@ -38,6 +42,10 @@ export async function savePropertyAnalysis(fd:FormData){
 
 export async function archivePropertyAnalysis(fd:FormData){
  const s=await createClient();const {data:{user}}=await s.auth.getUser();if(!user)redirect('/login')
+ const {data:course}=await s.from('courses').select('id').eq('slug','pratica-profissional-avancada').eq('status','published').maybeSingle()
+ if(!course) redirect('/academia')
+ const {data:allowed}=await s.rpc('has_course_access',{target_course_id:course.id})
+ if(!allowed) redirect('/academia/pratica-profissional-avancada')
  const id=Number(fd.get('id'));if(id)await s.from('property_analyses').update({status:'archived',updated_at:new Date().toISOString()}).eq('id',id).eq('user_id',user.id)
  redirect('/analisar-imovel')
 }
