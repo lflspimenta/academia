@@ -74,7 +74,7 @@ export default async function Documentos({searchParams}:{searchParams:Promise<Re
   return <AppShell>
     <div className="eyebrow">Ferramenta profissional</div>
     <h1>Que documentos preciso?</h1>
-    <p className="muted">Escolha a operação, o tipo de imóvel e a situação. A checklist é gerada a partir das regras publicadas no Supabase.</p>
+    <p className="muted">Escolha a operação, o tipo de imóvel e a situação. Receba uma checklist adaptada ao tipo de imóvel, à operação e à situação selecionada.</p>
 
     {metaError&&<div className="error-note section">Não foi possível carregar as regras documentais: {metaError.message}</div>}
 

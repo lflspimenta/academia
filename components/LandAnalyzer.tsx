@@ -32,7 +32,7 @@ export default function LandAnalyzer({rules}:{rules:Rule[]}){
  const nextSteps=matched.filter(r=>r.rule_type==='next_step')
  const risk=alerts.some(r=>r.severity==='alto')?'alto':alerts.some(r=>r.severity==='medio')?'médio':'baixo'
  const set=(k:string,v:string)=>setA((x:any)=>({...x,[k]:v}))
- const save=async()=>{setSaving(true);setSaved('');const r=await saveLandAnalysis({municipality:a.municipality,article:a.article,objective:a.objective,answers:a,riskLevel:risk,checklist,alerts,nextSteps});setSaved(r.ok?'Análise guardada no seu perfil.':`Não foi possível guardar: ${r.error}`);setSaving(false)}
+ const save=async()=>{setSaving(true);setSaved('');const r=await saveLandAnalysis({municipality:a.municipality,article:a.article,objective:a.objective,answers:a,riskLevel:risk,checklist,alerts,nextSteps});setSaved(r.ok?'Análise guardada no seu perfil.':'Não foi possível guardar a análise. Tente novamente.');setSaving(false)}
  return <div className="section">
    <div className="analyzer-progress"><span style={{width:`${step*25}%`}}/></div>
    <div className="analyzer-step-label">Passo {step} de 4</div>

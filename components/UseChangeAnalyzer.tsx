@@ -15,7 +15,7 @@ export default function UseChangeAnalyzer({rules}:{rules:Rule[]}){
  const matched=useMemo(()=>rules.filter(r=>match(r.conditions,a)),[rules,a])
  const checklist=matched.filter(r=>r.rule_type==='checklist'), alerts=matched.filter(r=>r.rule_type==='alert'), nextSteps=matched.filter(r=>r.rule_type==='next_step')
  const status=alerts.some(r=>r.severity==='alto')?'Existem obstáculos a analisar':alerts.some(r=>r.severity==='medio')?'Necessita verificação':'Potencialmente viável'
- const save=async()=>{setSaving(true);const r=await saveUseChangeAnalysis({municipality:a.municipality,propertyType:a.propertyType,currentUse:a.currentUse,intendedUse:a.intendedUse,autonomousFraction:a.autonomous_fraction,works:a.works,titleKnown:a.title_known,answers:a,resultStatus:status,checklist,alerts,nextSteps});setMsg(r.ok?'Análise guardada no seu perfil.':`Erro: ${r.error}`);setSaving(false)}
+ const save=async()=>{setSaving(true);const r=await saveUseChangeAnalysis({municipality:a.municipality,propertyType:a.propertyType,currentUse:a.currentUse,intendedUse:a.intendedUse,autonomousFraction:a.autonomous_fraction,works:a.works,titleKnown:a.title_known,answers:a,resultStatus:status,checklist,alerts,nextSteps});setMsg(r.ok?'Análise guardada no seu perfil.':'Não foi possível guardar a análise. Tente novamente.');setSaving(false)}
  return <section className="section">
    <div className="analyzer-progress"><span style={{width:`${step*25}%`}}/></div><div className="analyzer-step-label">Passo {step} de 4</div>
    {step===1&&<div className="card analyzer-card"><div className="eyebrow">Situação atual</div><h2>Que imóvel temos?</h2><div className="grid grid-2 section">

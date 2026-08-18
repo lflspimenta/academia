@@ -13,8 +13,8 @@ export default function QuizClient({quizId}:{quizId:number}){
  const [loading,setLoading]=useState(true)
  const [error,setError]=useState('')
  const supabase=createClient()
- useEffect(()=>{(async()=>{const {data,error}=await supabase.rpc('get_quiz_safe',{p_quiz_id:quizId});if(error)setError(error.message);else setQuiz(data as Quiz);setLoading(false)})()},[quizId])
- async function submit(){if(!quiz)return;setError('');const missing=quiz.questions.some(q=>!selected[q.id]);if(missing){setError('Responda a todas as perguntas antes de submeter.');return}setLoading(true);const payload=quiz.questions.map(q=>({question_id:q.id,answer_id:selected[q.id]}));const {data,error}=await supabase.rpc('submit_quiz',{p_quiz_id:quizId,p_answers:payload});if(error)setError(error.message);else setResult(data);setLoading(false)}
+ useEffect(()=>{(async()=>{const {data,error}=await supabase.rpc('get_quiz_safe',{p_quiz_id:quizId});if(error)setError('Não foi possível carregar o teste. Tente novamente.');else setQuiz(data as Quiz);setLoading(false)})()},[quizId])
+ async function submit(){if(!quiz)return;setError('');const missing=quiz.questions.some(q=>!selected[q.id]);if(missing){setError('Responda a todas as perguntas antes de submeter.');return}setLoading(true);const payload=quiz.questions.map(q=>({question_id:q.id,answer_id:selected[q.id]}));const {data,error}=await supabase.rpc('submit_quiz',{p_quiz_id:quizId,p_answers:payload});if(error)setError('Não foi possível submeter o teste. Tente novamente.');else setResult(data);setLoading(false)}
  if(loading&&!quiz)return <div className="card">A carregar teste…</div>
  if(error&&!quiz)return <div className="admin-note">{error}</div>
  if(!quiz)return null
