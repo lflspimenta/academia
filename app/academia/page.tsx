@@ -1,2 +1,9 @@
 import AppShell from '@/components/AppShell'
-export default function Academia(){return <AppShell><div className="eyebrow">Formação profissional</div><h1>Academia</h1><p className="muted">Percurso recomendado e especializações de acesso direto.</p><section className="section list"><div className="lesson"><span className="badge">Nível 1</span><h2 style={{marginTop:10}}>Iniciante · Entrar no imobiliário</h2><p className="muted">Mediação, prospeção, angariação, CMI, documentação, compradores, CPCV e escritura.</p><div className="progress"><span style={{width:'24%'}}/></div></div><div className="lesson"><span className="badge">Especialização</span><h2 style={{marginTop:10}}>Terrenos e potencial construtivo</h2><p className="muted">PDM, condicionantes, infraestruturas, loteamento, PIP e promoção imobiliária.</p></div><div className="lesson"><span className="badge">Especialização</span><h2 style={{marginTop:10}}>Documentação avançada</h2><p className="muted">Registo predial, matriz, urbanismo, heranças, usufrutos, ónus e divergências.</p></div></section></AppShell>}
+import { createClient } from '@/lib/supabase/server'
+import Link from 'next/link'
+
+export default async function Academia(){
+ const supabase=await createClient()
+ const {data:courses}=await supabase.from('courses').select('id,title,slug,description,level,position').eq('status','published').order('position')
+ return <AppShell><div className="eyebrow">Formação profissional</div><h1>Academia</h1><p className="muted">Percurso recomendado e especializações com conteúdo carregado a partir do Supabase.</p><section className="section list">{(courses||[]).map((c:any)=><Link className="lesson course-link" href={`/academia/${c.slug}`} key={c.id}><span className="badge">{c.level}</span><h2 style={{marginTop:10}}>{c.title}</h2><p className="muted">{c.description}</p><div className="link-arrow">Abrir percurso →</div></Link>)}</section></AppShell>
+}

@@ -1,58 +1,58 @@
-# Academia Imobiliária — V1 real
+# Academia Imobiliária — V2 Dinâmica
 
-Base Next.js + Supabase, sem pagamentos, mantendo o design aprovado.
+Esta versão transforma a Academia numa aplicação dinâmica com conteúdos carregados do Supabase.
 
-## 1. Criar o projeto Supabase
-1. Criar um projeto em supabase.com.
-2. Abrir SQL Editor e executar `supabase/schema.sql`.
-3. Em Project Settings/API copiar Project URL e Publishable Key.
-4. Criar `.env.local` a partir de `.env.example`.
+## O que muda nesta V2
 
-## 2. Criar o primeiro administrador
-1. Authentication > Users > Add user.
-2. Depois no SQL Editor executar:
-   `update public.profiles set role='admin' where id='<UUID DO UTILIZADOR>';`
+- Academia e cursos vêm da base de dados.
+- Percurso Nível 1 com 10 módulos criado no Supabase.
+- Primeira aula completa com mini teste.
+- Progresso por utilizador guardado na base de dados.
+- Testes corrigidos por função SQL no servidor sem expor `is_correct` ao aluno.
+- Dashboard calcula progresso e média real.
+- Radar Legislativo dinâmico.
+- Backoffice para criar cursos, módulos, aulas e atualizações legislativas.
+- Conteúdo legal inclui `verified_at` e fonte oficial.
+- Área Terrenos passa a usar o curso dinâmico `/academia/terrenos`.
 
-## 3. Executar localmente
-Requer Node.js 20.9+.
+## Atualização no projeto Supabase já existente
 
-```bash
-npm install
-npm run dev
-```
+Não volte a executar `schema.sql` se já o executou na V1.
 
-Abrir http://localhost:3000.
+Execute apenas:
 
-## 4. Publicar na Vercel
-1. Enviar esta pasta para um repositório GitHub.
-2. Na Vercel, New Project > importar o repositório.
-3. Adicionar `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` em Environment Variables.
-4. Deploy.
+`supabase/v2_dynamic.sql`
 
-## Estado desta V1
-- Login por email/password ligado ao Supabase.
-- Proteção de rotas através de `proxy.ts` (Next.js 16).
-- Perfis Student/Admin no banco de dados.
-- Schema para cursos, módulos, aulas, quizzes, perguntas, respostas, progresso, documentos e Radar Legislativo.
-- RLS ativado e políticas iniciais.
-- Interface premium aprovada aplicada às páginas principais.
-- Sem Stripe/pagamentos nesta fase.
+No Supabase: **SQL Editor → New query → cole todo o conteúdo do ficheiro → Run**.
 
-## Próxima evolução
-Ligar as páginas de Academia/Admin aos dados reais do Supabase e criar formulários de edição/publicação no backoffice.
+O script acrescenta as funções seguras dos quizzes, estrutura os 10 módulos do Nível 1, cria a estrutura de Terrenos e introduz a primeira atualização do Radar relativa ao RJUE 2026 e à retificação publicada em julho de 2026.
 
-## Recuperação de password
+## Atualizar no GitHub
 
-A V1 inclui agora o fluxo completo de recuperação:
+Substitua os ficheiros do repositório pelos desta V2, mantendo as mesmas Environment Variables na Vercel:
 
-- `/forgot-password` envia o email através do Supabase Auth.
-- `/auth/callback` troca o código PKCE por uma sessão válida.
-- `/reset-password` permite definir a nova password.
-- O utilizador é depois encaminhado novamente para `/login`.
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
 
-No Supabase > Authentication > URL Configuration, mantenha:
+Faça commit para a branch `main`. A Vercel deverá iniciar novo deploy automaticamente.
 
-- Site URL: o domínio de produção da Vercel.
-- Redirect URLs: inclua `https://SEU-DOMINIO.vercel.app/**`.
+## Sequência recomendada de teste
 
-Para produção com domínio próprio, adicione também esse domínio às Redirect URLs.
+1. Login com a conta admin.
+2. Abrir `/academia`.
+3. Abrir `Iniciante · Entrar no Imobiliário`.
+4. Abrir a primeira aula.
+5. Marcar a aula como concluída.
+6. Fazer o mini teste.
+7. Voltar ao Dashboard e confirmar progresso e média.
+8. Abrir `/admin` e criar um curso/módulo/aula de teste em rascunho.
+9. Publicar pelo backoffice e confirmar que aparece na Academia.
+10. Abrir Radar Legislativo.
+
+## Segurança dos testes
+
+Os alunos não têm `SELECT` na tabela `answers`. A função `get_quiz_safe` devolve apenas o texto/id das opções. A função `submit_quiz` corrige dentro da base de dados e só depois devolve score, aprovação e explicações.
+
+## Conteúdo jurídico
+
+Conteúdo jurídico, fiscal, documental e urbanístico deve continuar a ser revisto antes de publicação. A V2 inclui campos de data de verificação e fonte oficial precisamente para manter essa disciplina editorial.
