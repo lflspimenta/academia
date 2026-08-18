@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-const baseNav=[['/dashboard','Início'],['/academia','Academia'],['/documentos','Documentos'],['/radar','Radar legislativo'],['/terrenos','Terrenos']]
+const baseNav=[['/dashboard','Início'],['/academia','Academia'],['/documentos','Documentos'],['/radar','Radar legislativo'],['/terrenos','Analisar Terreno'],['/alteracao-uso','Alterar Uso do Imóvel']]
 export default async function AppShell({children}:{children:React.ReactNode}){
  const supabase=await createClient();const {data:{user}}=await supabase.auth.getUser();let isAdmin=false;if(user){const {data:p}=await supabase.from('profiles').select('role').eq('id',user.id).maybeSingle();isAdmin=p?.role==='admin'}
  const nav=isAdmin?[...baseNav,['/admin','Administração']]:baseNav
