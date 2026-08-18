@@ -40,3 +40,19 @@ Abrir http://localhost:3000.
 
 ## Próxima evolução
 Ligar as páginas de Academia/Admin aos dados reais do Supabase e criar formulários de edição/publicação no backoffice.
+
+## Recuperação de password
+
+A V1 inclui agora o fluxo completo de recuperação:
+
+- `/forgot-password` envia o email através do Supabase Auth.
+- `/auth/callback` troca o código PKCE por uma sessão válida.
+- `/reset-password` permite definir a nova password.
+- O utilizador é depois encaminhado novamente para `/login`.
+
+No Supabase > Authentication > URL Configuration, mantenha:
+
+- Site URL: o domínio de produção da Vercel.
+- Redirect URLs: inclua `https://SEU-DOMINIO.vercel.app/**`.
+
+Para produção com domínio próprio, adicione também esse domínio às Redirect URLs.
