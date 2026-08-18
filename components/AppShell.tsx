@@ -20,7 +20,7 @@ export default async function AppShell({ children }: { children: React.ReactNode
   const tools:NavItem[]=[]
   if(can('terrenos')) tools.push(['/terrenos','Analisar Terreno',MapIcon])
   if(can('urbanismo-pratico')) tools.push(['/alteracao-uso','Alterar Uso',Building2])
-  if(can('documentacao-imobiliaria')) tools.push(['/checklist-documentos','Checklist documental',ClipboardCheck])
+  if(can('documentacao-imobiliaria-profissional')) tools.push(['/checklist-documentos','Checklist documental',ClipboardCheck])
 
   const nav=(items:NavItem[])=>items.map(([href,label,Icon])=><Link key={href} href={href}><Icon size={17}/><span>{label}</span></Link>)
 

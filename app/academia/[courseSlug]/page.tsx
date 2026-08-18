@@ -6,7 +6,7 @@ import { notFound } from 'next/navigation'
 const toolBySlug:Record<string,{href:string,label:string}> = {
   'terrenos':{href:'/terrenos',label:'Abrir Analisar Terreno'},
   'urbanismo-pratico':{href:'/alteracao-uso',label:'Abrir Alterar Uso do Imóvel'},
-  'documentacao-imobiliaria':{href:'/checklist-documentos',label:'Abrir Que documentos preciso?'}
+  'documentacao-imobiliaria-profissional':{href:'/checklist-documentos',label:'Abrir Que documentos preciso?'}
 }
 
 export default async function CoursePage({params}:{params:Promise<{courseSlug:string}>}){

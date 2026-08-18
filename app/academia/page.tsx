@@ -6,7 +6,7 @@ import { ArrowRight, LockKeyhole, Check, Map, Building2, ClipboardCheck, Graduat
 const tool:any={
  'terrenos':['Analisar Terreno',Map],
  'urbanismo-pratico':['Alterar Uso do Imóvel',Building2],
- 'documentacao-imobiliaria':['Checklist documental',ClipboardCheck]
+ 'documentacao-imobiliaria-profissional':['Checklist documental',ClipboardCheck]
 }
 export default async function Academia(){
  const {supabase,isAdmin,accessIds}=await accessContext()
