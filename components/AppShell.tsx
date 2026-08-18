@@ -1,4 +1,5 @@
-import Link from 'next/link'
+import
+          <Link href="/checklist-documentos">Que documentos preciso?</Link> Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 const baseNav=[['/dashboard','Início'],['/academia','Academia'],['/documentos','Documentos'],['/radar','Radar legislativo'],['/terrenos','Analisar Terreno'],['/alteracao-uso','Alterar Uso do Imóvel']]
 export default async function AppShell({children}:{children:React.ReactNode}){
