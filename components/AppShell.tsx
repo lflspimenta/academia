@@ -15,7 +15,7 @@ export default async function AppShell({ children }: { children: React.ReactNode
     ['/academia','Academia',GraduationCap],
     ['/progresso','O meu progresso',ChartNoAxesColumnIncreasing],
     ['/documentos','Biblioteca',FolderOpen],
-    ['/radar','Radar legislativo',Scale],
+    ['/glossario','Glossário Profissional',BookOpen],['/radar','Radar legislativo',Scale],
   ]
   const tools:NavItem[]=[]
   if(can('pratica-profissional-avancada')) tools.push(['/analisar-imovel','Analisar Imóvel',Home])
