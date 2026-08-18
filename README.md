@@ -48,3 +48,7 @@ A própria conta do administrador autenticado não pode ser bloqueada/despromovi
 ## Base de dados
 
 Esta atualização não exige SQL novo. Continue com o schema/V2 e o pacote V3 de conteúdo já executados.
+
+
+## V5.1 — Analisar Terreno
+Execute `supabase/v5_1_land_analyzer.sql` no Supabase. A rota `/terrenos` passa a ser uma ferramenta guiada e as análises podem ser guardadas por utilizador.
