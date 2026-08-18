@@ -18,6 +18,7 @@ export default async function AppShell({ children }: { children: React.ReactNode
     ['/radar','Radar legislativo',Scale],
   ]
   const tools:NavItem[]=[]
+  tools.push(['/analisar-imovel','Analisar Imóvel',Home])
   if(can('terrenos')) tools.push(['/terrenos','Analisar Terreno',MapIcon])
   if(can('urbanismo-pratico')) tools.push(['/alteracao-uso','Alterar Uso',Building2])
   if(can('documentacao-imobiliaria-profissional')) tools.push(['/checklist-documentos','Checklist documental',ClipboardCheck])
