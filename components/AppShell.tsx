@@ -27,10 +27,23 @@ export default async function AppShell({ children }: { children: React.ReactNode
 
   return <div className="app-shell">
     <aside className="sidebar">
-      <div className="brand-mark"><div className="brand-monogram">AI</div><div><div className="brand-title">Academia Imobiliária</div><div className="brand-sub">Formação profissional · Portugal</div></div></div>
-      <div className="nav-label">Aprender</div><nav className="nav">{nav(main)}</nav>
-      {tools.length>0&&<><div className="nav-label nav-label-tools">Ferramentas</div><nav className="nav nav-tools">{nav(tools)}</nav></>}
-      {isAdmin&&<><div className="nav-label nav-label-tools">Gestão</div><nav className="nav"><Link href="/admin"><ShieldCheck size={17}/><span>Administração</span></Link></nav></>}
+      <div className="sidebar-top">
+        <div className="brand-mark"><div className="brand-monogram">AI</div><div><div className="brand-title">Academia Imobiliária</div><div className="brand-sub">Formação profissional · Portugal</div></div></div>
+        <details className="mobile-menu">
+          <summary><span>Menu</span><span className="mobile-menu-icon" aria-hidden="true">☰</span></summary>
+          <div className="mobile-menu-panel">
+            <div className="nav-label">Aprender</div><nav className="nav">{nav(main)}</nav>
+            {tools.length>0&&<><div className="nav-label nav-label-tools">Ferramentas</div><nav className="nav nav-tools">{nav(tools)}</nav></>}
+            {isAdmin&&<><div className="nav-label nav-label-tools">Gestão</div><nav className="nav"><Link href="/admin"><ShieldCheck size={17}/><span>Administração</span></Link></nav></>}
+            <form action={signOutAction}><button className="logout-button mobile-logout" type="submit"><LogOut size={16}/><span>Terminar sessão</span></button></form>
+          </div>
+        </details>
+      </div>
+      <div className="desktop-sidebar-nav">
+        <div className="nav-label">Aprender</div><nav className="nav">{nav(main)}</nav>
+        {tools.length>0&&<><div className="nav-label nav-label-tools">Ferramentas</div><nav className="nav nav-tools">{nav(tools)}</nav></>}
+        {isAdmin&&<><div className="nav-label nav-label-tools">Gestão</div><nav className="nav"><Link href="/admin"><ShieldCheck size={17}/><span>Administração</span></Link></nav></>}
+      </div>
       <div className="sidebar-bottom">
         <div className="sidebar-legal-note">Conteúdos profissionais com fontes e datas de verificação.</div>
         <form action={signOutAction}><button className="logout-button" type="submit"><LogOut size={16}/><span>Terminar sessão</span></button></form>
