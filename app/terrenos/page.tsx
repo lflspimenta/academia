@@ -35,7 +35,7 @@ export default async function TerrenosPage(){
         <h1>Analisar Terreno</h1>
         <p className="muted">Due diligence guiada para organizar a análise antes de anunciar, comprar ou desenvolver um terreno.</p>
       </div>
-      <Link className="btn secondary-outline" href="/academia/terrenos-potencial-construtivo">Abrir especialização</Link>
+      <Link className="btn secondary-outline" href="/academia/terrenos">Abrir especialização</Link>
     </div>
     <LandAnalyzer rules={rules||[]} />
     {recent.length>0 && <section className="section">

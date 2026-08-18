@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import AppShell from '@/components/AppShell'
 import { createClient } from '@/lib/supabase/server'
 import UseChangeAnalyzer from '@/components/UseChangeAnalyzer'
@@ -17,7 +18,7 @@ export default async function Page(){
       <div className="eyebrow">Ferramenta profissional</div>
       <h1>Posso mudar o uso deste imóvel?</h1>
       <p className="muted">Diagnóstico guiado para organizar uma alteração de utilização antes de a apresentar como viável.</p>
-    </div></div>
+    </div><Link className="btn secondary-outline" href="/academia/urbanismo-pratico">Abrir especialização</Link></div>
     <UseChangeAnalyzer rules={rules||[]} />
   </AppShell>
 }
