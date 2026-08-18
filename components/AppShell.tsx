@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { accessContext } from '@/lib/access'
 import { signOutAction } from '@/app/auth/signout/actions'
+import { Home, GraduationCap, ChartNoAxesColumnIncreasing, FolderOpen, Scale, Map, Building2, ClipboardCheck, ShieldCheck, LogOut } from 'lucide-react'
 
 export default async function AppShell({ children }: { children: React.ReactNode }) {
   const {isAdmin,accessIds,supabase}=await accessContext()
@@ -8,26 +9,29 @@ export default async function AppShell({ children }: { children: React.ReactNode
   const idBySlug=new Map((courses||[]).map((c:any)=>[c.slug,Number(c.id)]))
   const can=(slug:string)=>isAdmin||accessIds.has(idBySlug.get(slug)||-1)
 
-  const nav:any[]=[
-    ['/dashboard','Início'],
-    ['/academia','Academia'],
-    ['/documentos','Documentos'],
-    ['/radar','Radar legislativo'],
+  const main:any[]=[
+    ['/dashboard','Início',Home],
+    ['/academia','Academia',GraduationCap],
+    ['/progresso','O meu progresso',ChartNoAxesColumnIncreasing],
+    ['/documentos','Biblioteca',FolderOpen],
+    ['/radar','Radar legislativo',Scale],
   ]
-  if(can('terrenos')) nav.push(['/terrenos','Analisar Terreno'])
-  if(can('urbanismo-pratico')) nav.push(['/alteracao-uso','Alterar Uso do Imóvel'])
-  if(can('documentacao-imobiliaria')) nav.push(['/checklist-documentos','Que documentos preciso?'])
-  if(isAdmin) nav.push(['/admin','Administração'])
+  const tools:any[]=[]
+  if(can('terrenos')) tools.push(['/terrenos','Analisar Terreno',Map])
+  if(can('urbanismo-pratico')) tools.push(['/alteracao-uso','Alterar Uso',Building2])
+  if(can('documentacao-imobiliaria')) tools.push(['/checklist-documentos','Checklist documental',ClipboardCheck])
+
+  const nav=(items:any[])=>items.map(([href,label,Icon])=><Link key={href} href={href}><Icon size={17}/><span>{label}</span></Link>)
 
   return <div className="app-shell">
     <aside className="sidebar">
-      <div className="brand-kicker">Academia</div>
-      <div className="brand-title">Imobiliária</div>
-      <div className="brand-sub">Formação profissional · Portugal</div>
-      <nav className="nav">{nav.map(([href,label])=><Link key={href} href={href}>{label}</Link>)}</nav>
+      <div className="brand-mark"><div className="brand-monogram">AI</div><div><div className="brand-title">Academia Imobiliária</div><div className="brand-sub">Formação profissional · Portugal</div></div></div>
+      <div className="nav-label">Aprender</div><nav className="nav">{nav(main)}</nav>
+      {tools.length>0&&<><div className="nav-label nav-label-tools">Ferramentas</div><nav className="nav nav-tools">{nav(tools)}</nav></>}
+      {isAdmin&&<><div className="nav-label nav-label-tools">Gestão</div><nav className="nav"><Link href="/admin"><ShieldCheck size={17}/><span>Administração</span></Link></nav></>}
       <div className="sidebar-bottom">
-        <div className="sidebar-legal-note">Conteúdo legal com data de verificação e fonte oficial.</div>
-        <form action={signOutAction}><button className="logout-button" type="submit">Terminar sessão</button></form>
+        <div className="sidebar-legal-note">Conteúdos profissionais com fontes e datas de verificação.</div>
+        <form action={signOutAction}><button className="logout-button" type="submit"><LogOut size={16}/><span>Terminar sessão</span></button></form>
       </div>
     </aside>
     <main className="content">{children}</main>
