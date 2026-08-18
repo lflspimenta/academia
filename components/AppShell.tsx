@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { accessContext } from '@/lib/access'
 import { signOutAction } from '@/app/auth/signout/actions'
-import { Home, GraduationCap, ChartNoAxesColumnIncreasing, FolderOpen, Scale, Map as MapIcon, Building2, ClipboardCheck, ShieldCheck, LogOut, type LucideIcon } from 'lucide-react'
+import { Home, GraduationCap, ChartNoAxesColumnIncreasing, FolderOpen, Scale, Map as MapIcon, Building2, ClipboardCheck, ShieldCheck, LogOut, BookOpen, type LucideIcon } from 'lucide-react'
 
 export default async function AppShell({ children }: { children: React.ReactNode }) {
   const {isAdmin,accessIds,supabase}=await accessContext()
