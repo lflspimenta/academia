@@ -37,11 +37,17 @@ export default async function CoursePage({params}:{params:Promise<{courseSlug:st
  const {data:modules}=await supabase.from('modules').select('id,title,description,position,lessons(id,title,duration_minutes,position,status),quizzes(id,title,lesson_id)').eq('course_id',course.id).eq('status','published').order('position')
  const {data:{user}}=await supabase.auth.getUser()
  let completed=new Set<number>()
+ let passedQuizzes=new Map<number,number>()
  if(user){
    const lessonIds=(modules||[]).flatMap((m:any)=>(m.lessons||[]).map((l:any)=>l.id))
    if(lessonIds.length){
      const {data:p}=await supabase.from('user_lesson_progress').select('lesson_id').eq('user_id',user.id).eq('completed',true).in('lesson_id',lessonIds)
      completed=new Set((p||[]).map((x:any)=>x.lesson_id))
+   }
+   const quizIds=(modules||[]).flatMap((m:any)=>(m.quizzes||[]).map((q:any)=>q.id))
+   if(quizIds.length){
+     const {data:attempts}=await supabase.from('quiz_attempts').select('quiz_id,score,passed').eq('user_id',user.id).in('quiz_id',quizIds).eq('passed',true)
+     for(const a of attempts||[]){const id=Number((a as any).quiz_id);const score=Number((a as any).score);if(!passedQuizzes.has(id)||score>(passedQuizzes.get(id)||0))passedQuizzes.set(id,score)}
    }
  }
  const total=(modules||[]).reduce((n:number,m:any)=>n+(m.lessons||[]).filter((l:any)=>l.status==='published').length,0)
@@ -56,6 +62,6 @@ export default async function CoursePage({params}:{params:Promise<{courseSlug:st
    <div className="progress section"><span style={{width:`${pct}%`}}/></div>
    {tool&&<div className="course-tool-callout"><div><strong>Ferramenta incluída nesta formação</strong><span>Use o conhecimento do curso numa análise prática.</span></div><Link className="btn" href={tool.href}>{tool.label} →</Link></div>}
    <section className="section module-stack">{(modules||[]).map((m:any)=><div className="card module-card" id={`modulo-${m.position}`} key={m.id}><div className="module-head"><div><div className="eyebrow">Módulo {m.position}</div><h2>{m.title}</h2><p className="muted">{m.description}</p></div></div><div className="lesson-items">{(m.lessons||[]).filter((l:any)=>l.status==='published').sort((a:any,b:any)=>a.position-b.position).map((l:any)=><Link href={`/aula/${l.id}`} className="lesson-row" key={l.id}><span className={completed.has(l.id)?'status-dot done':'status-dot'}></span><div><strong>{l.title}</strong><div className="muted small">{l.duration_minutes||8} min {completed.has(l.id)?'· concluída':''}</div></div><span className="row-arrow">→</span></Link>)}
-   {(m.quizzes||[]).filter((q:any)=>!q.lesson_id).map((q:any)=><Link href={`/teste/${q.id}`} className="lesson-row quiz-row" key={q.id}><span className="status-dot quiz-dot"></span><div><strong>{q.title}</strong><div className="muted small">Teste de avaliação do módulo</div></div><span className="row-arrow">→</span></Link>)}</div></div>)}</section>
+   {(m.quizzes||[]).filter((q:any)=>!q.lesson_id).map((q:any)=>{const score=passedQuizzes.get(Number(q.id));const done=score!==undefined;return <Link href={`/teste/${q.id}`} className="lesson-row quiz-row" key={q.id}><span className={done?'status-dot done':'status-dot quiz-dot'}></span><div><strong>{q.title}</strong><div className="muted small">{done?`Teste concluído · ${Math.round(score!)}%`:'Teste de avaliação do módulo'}</div></div><span className="row-arrow">→</span></Link>})}</div></div>)}</section>
  </AppShell>
 }
