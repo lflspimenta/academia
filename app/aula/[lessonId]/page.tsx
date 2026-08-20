@@ -16,7 +16,7 @@ export default async function LessonPage({params}:{params:Promise<{lessonId:stri
  const {data:quiz}=await supabase.from('quizzes').select('id,title').eq('lesson_id',id).maybeSingle()
  const {data:siblings}=await supabase.from('lessons').select('id,title,position,module_id,modules(position,course_id)').eq('status','published')
  const sameCourse=(siblings||[]).filter((l:any)=>l.modules?.course_id===course?.id).sort((a:any,b:any)=>(a.modules?.position-b.modules?.position)||(a.position-b.position))
- const idx=sameCourse.findIndex((l:any)=>l.id===id);const coursePct=sameCourse.length?Math.round(((idx+1)/sameCourse.length)*100):0;const prev=idx>0?sameCourse[idx-1]:null;const next=idx>=0&&idx<sameCourse.length-1?sameCourse[idx+1]:null
+ const idx=sameCourse.findIndex((l:any)=>l.id===id);const coursePct=sameCourse.length?Math.round(((idx+1)/sameCourse.length)*100):0;const sameModule=sameCourse.filter((l:any)=>l.module_id===lesson.module_id);const moduleIdx=sameModule.findIndex((l:any)=>l.id===id);const prev=idx>0?sameCourse[idx-1]:null;const next=idx>=0&&idx<sameCourse.length-1?sameCourse[idx+1]:null
  return <AppShell>
  <div className="lesson-breadcrumb"><Link href="/academia">Academia</Link><span>›</span>{course?.slug&&<Link href={`/academia/${course.slug}`}>{course.title}</Link>}<span>›</span><Link href={`/academia/${course?.slug}#modulo-${mod?.position}`}>{mod?.title}</Link><span>›</span><strong>{lesson.title}</strong></div>
  <div className="back-row"><Link className="back-link" href={`/academia/${course?.slug}#modulo-${mod?.position}`}>← Voltar ao módulo</Link></div>
