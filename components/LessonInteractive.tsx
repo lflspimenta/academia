@@ -34,7 +34,7 @@ const taxFields=[
  {key:'implant',label:'Área de implantação do edifício',value:'135,0000 m²',text:'Área situada dentro do perímetro de fixação do edifício ao solo, medida pela parte exterior. A AT esclarece regras próprias para elementos como alpendres, telheiros e caves.'},
  {key:'private',label:'Área bruta privativa',value:'190,0000 m²',text:'Superfície total medida pelo perímetro exterior e eixos das paredes ou elementos separadores, incluindo os espaços que o CIMI integra nesta categoria. Não é sinónimo automático de área útil ou habitável.'},
  {key:'dependent',label:'Área bruta dependente',value:'55,0000 m²',text:'Áreas cobertas e fechadas de uso exclusivo com função acessória, como certas garagens, parqueamentos, arrecadações, caves, sótãos ou varandas quando não integram a área bruta privativa.'},
- {key:'construction',label:'Área bruta de construção',value:'245,0000 m²',text:'Não deve ser reconstruída por uma soma simplificada de campos. Para efeitos fiscais, o artigo 40.º do CIMI usa uma expressão própria que integra Aa (área bruta privativa), Ab (áreas brutas dependentes), o coeficiente de ajustamento de áreas e componentes de terreno livre. Leia sempre os campos da caderneta pelo nome exato e não converta automaticamente este valor em área útil ou habitável.'},
+ {key:'construction',label:'Área bruta de construção',value:'245,0000 m²',text:'Na explicação da Autoridade Tributária, corresponde ao somatório da área bruta privativa com a área bruta dependente. Neste exemplo: 190 + 55 = 245 m².'},
  {key:'free',label:'Área de terreno livre',value:'285,0000 m²',text:'Terreno não ocupado pelas construções. Neste exemplo: 420 m² de área total do terreno menos 135 m² de implantação = 285 m².'},
 ]
 function CadernetaLab(){
@@ -42,7 +42,7 @@ function CadernetaLab(){
  const correct=false
  return <section className="document-lab"><div className="interactive-lab-head"><div className="interactive-lab-icon"><FileSearch size={20}/></div><div><div className="eyebrow">Laboratório documental</div><h2>Aprenda a ler uma Caderneta Predial Urbana</h2><p>Exemplo pedagógico fictício. Clique nos campos para perceber o que significam e como se relacionam.</p></div></div>
  <div className="document-lab-grid"><div className="mock-document"><div className="mock-doc-top"><span>Autoridade Tributária e Aduaneira</span><strong>CADERNETA PREDIAL URBANA</strong><small>Exemplo exclusivamente pedagógico · dados fictícios</small></div><div className="mock-doc-section"><b>IDENTIFICAÇÃO DO PRÉDIO</b><div className="mock-doc-row"><span>Distrito: Porto</span><span>Concelho: Exemplo</span><span>Artigo: 1234</span></div></div><div className="mock-doc-section"><b>ÁREAS</b>{taxFields.map(f=><button type="button" key={f.key} onClick={()=>setActive(f.key)} className={`mock-doc-field ${active===f.key?'active':''}`}><span>{f.label}</span><strong>{f.value}</strong></button>)}</div><div className="mock-doc-section muted"><b>VALOR PATRIMONIAL TRIBUTÁRIO</b><div className="mock-doc-row"><span>VPT: 198 450,00 €</span><span>Ano: 2026</span></div></div></div>
- <div className="field-explainer">{taxFields.filter(f=>f.key===active).map(f=><div key={f.key}><div className="eyebrow">Campo selecionado</div><h3>{f.label}</h3><div className="field-value">{f.value}</div><p>{f.text}</p>{f.key==='construction'&&<div className="formula-box"><strong>Não usar soma simplificada</strong><span>consultar art. 40.º CIMI</span></div>}{f.key==='free'&&<div className="formula-box">420 m² <span>terreno</span> − 135 m² <span>implantação</span> = <strong>285 m²</strong></div>}</div>)}<div className="gold-rule"><strong>Regra profissional</strong><p>A caderneta é uma fonte matricial/fiscal. Cruze áreas e características com registo predial, documentação urbanística, plantas e realidade física quando sejam relevantes para o negócio.</p></div></div></div>
+ <div className="field-explainer">{taxFields.filter(f=>f.key===active).map(f=><div key={f.key}><div className="eyebrow">Campo selecionado</div><h3>{f.label}</h3><div className="field-value">{f.value}</div><p>{f.text}</p>{f.key==='construction'&&<div className="formula-box">190 m² <span>privativa</span> + 55 m² <span>dependente</span> = <strong>245 m²</strong></div>}{f.key==='free'&&<div className="formula-box">420 m² <span>terreno</span> − 135 m² <span>implantação</span> = <strong>285 m²</strong></div>}</div>)}<div className="gold-rule"><strong>Regra profissional</strong><p>A caderneta é uma fonte matricial/fiscal. Cruze áreas e características com registo predial, documentação urbanística, plantas e realidade física quando sejam relevantes para o negócio.</p></div></div></div>
  <div className="document-challenge"><div className="eyebrow">Agora analise</div><h3>Os 245 m² de área bruta de construção podem ser anunciados automaticamente como 245 m² de área habitável?</h3>{answer===null?<div className="yn-actions"><button type="button" className="btn" onClick={()=>setAnswer(true)}>Sim</button><button type="button" className="btn secondary-outline" onClick={()=>setAnswer(false)}>Não</button></div>:<><div className={`interactive-feedback ${answer===correct?'ok':'attention'}`}>{answer===correct?<CheckCircle2 size={17}/>:<CircleAlert size={17}/>}<span>Não. Área bruta de construção, área bruta privativa e área útil/habitável não são conceitos equivalentes. A métrica anunciada deve ser identificada corretamente.</span></div><button type="button" className="text-button" onClick={()=>setAnswer(null)}><RotateCcw size={14}/> Tentar novamente</button></>}</div>
  <div className="official-note">Definições pedagógicas alinhadas com o artigo 40.º do CIMI e com as FAQ da Autoridade Tributária sobre áreas dos prédios edificados.</div></section>
 }
@@ -115,19 +115,40 @@ function ModuleFinalCase({courseSlug}:{courseSlug?:string}){
 }
 
 export default function LessonInteractive({lessonTitle,courseSlug}:Props){
- const t=lessonTitle.toLowerCase()
+ const t=lessonTitle
+
+ // Regra pedagógica V14: interação apenas depois de o conceito ter sido ensinado.
+ // Nada é disparado por palavras genéricas como "mediação imobiliária".
  const blocks:any[]=[]
- if(t.includes('caderneta predial')) blocks.push(<CadernetaLab key="cad"/>)
- if(t.includes('certidão')||t.includes('registo predial')) blocks.push(<QuizBlock key="reg" scenario={scenarios.registry}/>,<RiskClassifier key="risk"/>,<FindError key="err"/>)
- if(t.includes('cmi')||t.includes('mediação imobiliária')) blocks.push(<QuizBlock key="cmi" scenario={scenarios.cmi}/>)
- if(t.includes('cpcv')) blocks.push(<QuizBlock key="cpcv" scenario={scenarios.cpcv}/>,<ProcessOrder key="order" kind="cpcv"/>)
- if(t.includes('pdm')||t.includes('ran')||t.includes('ren')||t.includes('pip')||t.includes('urbaniz')||courseSlug==='terrenos') blocks.push(<QuizBlock key="land" scenario={scenarios.land}/>,<LandSimulator key="sim"/>)
- if(t.includes('branqueamento')||t.includes('aml')) blocks.push(<QuizBlock key="aml" scenario={scenarios.aml}/>,<RiskClassifier key="amlrisk"/>)
- if(t.includes('herança')||t.includes('herdeir')) blocks.push(<QuizBlock key="her" scenario={scenarios.inheritance}/>)
- if(t.includes('document')||t.includes('caderneta')||t.includes('certidão')) blocks.push(<StepCase key="stepdocs" kind="docs"/>)
- if(t.includes('alteração')||t.includes('uso')||t.includes('urbanismo')) blocks.push(<StepCase key="stepurban" kind="urban"/>)
- if(courseSlug==='terrenos'&&(t.includes('caso')||t.includes('análise económica'))) blocks.push(<ProcessOrder key="landorder" kind="land"/>,<ModuleFinalCase key="final" courseSlug={courseSlug}/>)
- if(t.includes('caso')||t.includes('conclus')||t.includes('revis')) blocks.push(<ModuleFinalCase key="genericfinal" courseSlug={courseSlug}/>)
+
+ if(t==='Caderneta predial: função fiscal e validade'||t==='Caderneta predial e matriz'){
+   blocks.push(<CadernetaLab key="cad"/>,<FindError key="err"/>)
+ }
+ if(t==='Certidão predial: o que realmente diz'||t==='Certidão permanente do registo predial'){
+   blocks.push(<QuizBlock key="reg" scenario={scenarios.registry}/>,<RiskClassifier key="risk"/>)
+ }
+ if(t==='Compreender o CMI'||t==='Contrato de Mediação Imobiliária — CMI'){
+   blocks.push(<QuizBlock key="cmi" scenario={scenarios.cmi}/>)
+ }
+ if(t==='O que é o CPCV'||t==='O que deve ficar claro no CPCV'){
+   blocks.push(<QuizBlock key="cpcv" scenario={scenarios.cpcv}/>,<ProcessOrder key="ord" kind="cpcv"/>)
+ }
+ if(['Como ler o PDM sem ser urbanista','RAN: o que significa na análise de um terreno','REN: atenção à alteração de 2026','O que é o PIP e quando faz sentido'].includes(t)){
+   blocks.push(<QuizBlock key="land" scenario={scenarios.land}/>,<LandSimulator key="sim"/>)
+ }
+ if(t==='Identificação, beneficiário efetivo e origem de fundos'||t==='Sinais de alerta no negócio imobiliário'){
+   blocks.push(<QuizBlock key="aml" scenario={scenarios.aml}/>,<RiskClassifier key="amlrisk"/>)
+ }
+ if(t==='Imóvel em herança'){
+   blocks.push(<QuizBlock key="her" scenario={scenarios.inheritance}/>)
+ }
+ if(['Cruzamento documental profissional','Divergências na fração','Checklist urbanística antes de angariar'].includes(t)){
+   blocks.push(<StepCase key="steps" kind={t==='Checklist urbanística antes de angariar'?'urban':'docs'}/>)
+ }
+ if(['Caso: terreno urbano com índice aparentemente favorável','Caso: terreno em REN alterada em 2026','Caso: vendedor anuncia “projeto aprovado”'].includes(t)){
+   blocks.push(<ModuleFinalCase key="final" courseSlug={courseSlug}/>)
+ }
+
  if(blocks.length===0) return null
  return <>{blocks}<LearningChecklist lessonTitle={lessonTitle}/></>
 }
